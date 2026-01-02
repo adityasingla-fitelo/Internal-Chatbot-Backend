@@ -1,0 +1,9 @@
+{
+  "pause_facility": "My client wants to pause their diet plan. Client is asking to pause the plan temporarily. Need to put a client’s plan on hold. Client going on vacation and requested plan pause. Client ka plan pause karna hai.",
+
+  "sales_amount_discrepancy": "Sales has been done but amount is not reflecting. Client payment received but sales amount not credited. Sales amount incorrect for my client. Payment mismatch in sales. Sales entry not updated.",
+
+  "referral_amount_discrepancy": "Referral amount is not updated. Referral benefit not credited. Referral entry missing in sheet. Client referral amount not showing. Referral bonus pending.",
+
+  "app_not_working": "Client app is not working properly. App crashing for client. Unable to login. Meal plan not visible. App issue reported by client."
+}
