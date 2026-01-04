@@ -7,9 +7,10 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-def match_intent(query, intent_embeddings, threshold=0.75):
+def match_intent(query, intent_embeddings, low_conf_threshold=0.65):
     """
-    Converts user query to embedding and finds closest intent
+    Always returns the closest intent.
+    Marks low confidence instead of returning 'unknown'.
     """
 
     response = client.embeddings.create(
@@ -19,8 +20,8 @@ def match_intent(query, intent_embeddings, threshold=0.75):
 
     query_embedding = np.array(response.data[0].embedding)
 
-    best_intent = "unknown"
-    best_score = 0.0
+    best_intent = None
+    best_score = -1.0
 
     for intent, emb in intent_embeddings.items():
         score = cosine_similarity(query_embedding, emb)
@@ -30,13 +31,8 @@ def match_intent(query, intent_embeddings, threshold=0.75):
 
     confidence = round(best_score, 3)
 
-    if confidence < threshold:
-        return {
-            "intent": "unknown",
-            "confidence": confidence
-        }
-
     return {
         "intent": best_intent,
-        "confidence": confidence
+        "confidence": confidence,
+        "low_confidence": confidence < low_conf_threshold
     }

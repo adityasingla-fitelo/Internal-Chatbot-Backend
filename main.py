@@ -22,5 +22,7 @@ async def chat_endpoint(message: str = Form(...)):
     return {
         "reply": "Hi, thanks for reaching out.",
         "detected_intent": result["intent"],
-        "confidence": result["confidence"]
+        "confidence": result["confidence"],
+        "low_confidence": result["low_confidence"]
     }
+
