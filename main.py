@@ -1,22 +1,19 @@
 from fastapi import FastAPI, Form
 from fastapi.middleware.cors import CORSMiddleware
-from embeddings_store import generate_intent_embeddings
+from embeddings_store import load_intent_embeddings
 from intent_matcher import match_intent
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],   # restrict later
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 🔥 This runs ONCE when Render starts the service
-intent_embeddings = generate_intent_embeddings()
+# Load intent embeddings ONCE at startup
+intent_embeddings = load_intent_embeddings()
 
 @app.post("/chat")
 async def chat_endpoint(message: str = Form(...)):

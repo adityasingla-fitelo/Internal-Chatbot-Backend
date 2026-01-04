@@ -4,11 +4,14 @@ from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def match_intent(query, intent_embeddings, threshold=0.75):
+    """
+    Converts user query to embedding and finds closest intent
+    """
+
     response = client.embeddings.create(
         model="text-embedding-3-small",
         input=query
@@ -28,6 +31,12 @@ def match_intent(query, intent_embeddings, threshold=0.75):
     confidence = round(best_score, 3)
 
     if confidence < threshold:
-        return {"intent": "unknown", "confidence": confidence}
+        return {
+            "intent": "unknown",
+            "confidence": confidence
+        }
 
-    return {"intent": best_intent, "confidence": confidence}
+    return {
+        "intent": best_intent,
+        "confidence": confidence
+    }
