@@ -27,42 +27,24 @@ async def chat(
     session = get_session(session_id)
     msg = message.strip().lower()
 
-    # ===============================
-    # STEP 1: Intent confirmation
-    # ===============================
-    if session.get("awaiting_confirmation"):
-        if msg == "yes":
-            session["final_intent"] = session["pending_intent"]
-            session["pending_intent"] = None
-            session["awaiting_confirmation"] = False
-            save_session(session_id, session)
+    # --------------------------------
+    # 0️⃣ SAFETY: Ensure required keys
+    # --------------------------------
+    session.setdefault("pending_intent", None)
+    session.setdefault("final_intent", None)
+    session.setdefault("awaiting_confirmation", False)
+    session.setdefault("workflow_state", None)
+    session.setdefault("data", {})
 
-        elif msg == "no":
-            clear_session(session_id)
-            return {
-                "reply": "No problem. Please state your query more clearly.",
-                "stage": "restart"
-            }
-
-        else:
-            return {
-                "reply": "Please reply with Yes or No.",
-                "stage": "awaiting_confirmation"
-            }
-
-    # ===============================
-    # STEP 2: Route intent workflow
-    # ===============================
-    if session.get("final_intent"):
-        updated_session, response = route_intent(
+    # --------------------------------
+    # 1️⃣ ACTIVE WORKFLOW → ROUTE ONLY
+    # --------------------------------
+    if session["final_intent"]:
+        updated_session, reply, stage = route_intent(
             session["final_intent"],
             session,
             message
         )
-
-        # response is expected to be a dict
-        reply = response.get("reply")
-        stage = response.get("stage")
 
         if updated_session is None:
             clear_session(session_id)
@@ -74,22 +56,58 @@ async def chat(
             "stage": stage
         }
 
-    # ===============================
-    # STEP 3: Detect intent
-    # ===============================
+    # --------------------------------
+    # 2️⃣ WAITING FOR INTENT CONFIRMATION
+    # --------------------------------
+    if session["awaiting_confirmation"]:
+        if msg == "yes":
+            session["final_intent"] = session["pending_intent"]
+            session["pending_intent"] = None
+            session["awaiting_confirmation"] = False
+            save_session(session_id, session)
+
+            # ⬇️ Immediately enter workflow
+            updated_session, reply, stage = route_intent(
+                session["final_intent"],
+                session,
+                message=""
+            )
+
+            if updated_session:
+                save_session(session_id, updated_session)
+
+            return {
+                "reply": reply,
+                "stage": stage
+            }
+
+        if msg == "no":
+            clear_session(session_id)
+            return {
+                "reply": "No problem. Please state your query more clearly.",
+                "stage": "rephrase"
+            }
+
+        return {
+            "reply": "Please reply with Yes or No.",
+            "stage": "awaiting_confirmation"
+        }
+
+    # --------------------------------
+    # 3️⃣ NEW CONVERSATION → DETECT INTENT
+    # --------------------------------
     result = match_intent(message, intent_embeddings)
 
-    detected_intent = result["intent"]
-
-    session["pending_intent"] = detected_intent
+    session["pending_intent"] = result["intent"]
     session["awaiting_confirmation"] = True
     save_session(session_id, session)
 
     return {
         "reply": (
             f"Thanks for reaching out. I understand your query is regarding "
-            f"'{detected_intent}'. Please enter Yes or No."
+            f"'{result['intent']}'. Please enter Yes or No."
         ),
         "stage": "intent_confirmation"
     }
+
 
