@@ -1,108 +1,69 @@
 import os
-import smtplib
+import base64
 from email.message import EmailMessage
-from typing import Dict
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 
 
-def send_sales_email(data: Dict):
-    smtp_email = os.getenv("SMTP_EMAIL")
-    smtp_pass = os.getenv("SMTP_PASSWORD")
-    smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-    smtp_port = int(os.getenv("SMTP_PORT", 587))
+def send_sales_email(data):
+    creds = Credentials(
+        None,
+        refresh_token=os.getenv("GMAIL_REFRESH_TOKEN"),
+        client_id=os.getenv("GMAIL_CLIENT_ID"),
+        client_secret=os.getenv("GMAIL_CLIENT_SECRET"),
+        token_uri="https://oauth2.googleapis.com/token",
+        scopes=["https://www.googleapis.com/auth/gmail.send"],
+    )
 
-    if not smtp_email or not smtp_pass:
-        raise RuntimeError("SMTP_EMAIL or SMTP_PASSWORD not set in environment")
-
-    dietician_email = data["email"]
-    description = data["description"]
-    payment_path = data["payment_screenshot"]
-    dashboard_path = data["dashboard_screenshot"]
+    service = build("gmail", "v1", credentials=creds)
 
     msg = EmailMessage()
-
-    msg["Subject"] = "Sales Amount Discrepancy – Dietician Support Request"
-    msg["From"] = smtp_email
+    msg["From"] = os.getenv("GMAIL_SENDER_EMAIL")
     msg["To"] = "aditya.s@fitelo.co"
-    msg["Cc"] = dietician_email
+    msg["Cc"] = data["email"]
+    msg["Subject"] = "Sales Amount Discrepancy – Dietician Support Request"
 
-    html_body = f"""
-<html>
-  <body style="
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 14px;
-    color: #222;
-    line-height: 1.6;
-  ">
-
-    <p>Hi Abhishek,</p>
-
-    <p>
-      I hope you are doing well.
-    </p>
-
-    <p>
-      This email is regarding a <strong>sales amount discrepancy</strong> raised by one of our dieticians through the
-      Fitelo Internal Support Tool.
-    </p>
-
-    <p>
-      <strong>Dietician Email:</strong><br/>
-      {dietician_email}
-    </p>
-
-    <p>
-      <strong>Issue Details:</strong><br/>
-      {description}
-    </p>
-
-    <p>
-      The relevant screenshots related to the payment and sales dashboard have been attached
-      for your reference.
-    </p>
-
-    <p>
-      Requesting you to please review the issue and take the necessary action at your end.
-    </p>
-
-    <p>
-      Thank you for your time and support.
-    </p>
-
-    <br/>
-
-    <p>
-      Regards,<br/>
-      Fitelo Internal Support Tool
-    </p>
-
-  </body>
-</html>
-"""
-
-
+    # ✅ Clean, professional plain-text email
     msg.set_content(
-        "This email contains HTML content. Please view it in an email client that supports HTML."
-    )
-    msg.add_alternative(html_body, subtype="html")
+f"""Hi Abhishek,
 
-    # 📎 Attach files
-    for label, path in [
-        ("Payment Screenshot", payment_path),
-        ("Dashboard Screenshot", dashboard_path),
+I hope you are doing well.
+
+This email is regarding a sales amount discrepancy raised by one of our dieticians through the Fitelo Internal Support Tool.
+
+Dietician Email:
+{data['email']}
+
+Issue Details:
+{data['description']}
+
+The relevant screenshots related to the payment and sales dashboard have been attached for your reference.
+
+Requesting you to please review the issue and take the necessary action at your end.
+
+Thank you for your time and support.
+
+Regards,
+Fitelo Internal Support Tool
+"""
+    )
+
+    # 📎 Attach screenshots
+    for path in [
+        data["payment_screenshot"],
+        data["dashboard_screenshot"],
     ]:
         with open(path, "rb") as f:
-            file_data = f.read()
-            file_name = os.path.basename(path)
+            msg.add_attachment(
+                f.read(),
+                maintype="image",
+                subtype="png",
+                filename=os.path.basename(path),
+            )
 
-        msg.add_attachment(
-            file_data,
-            maintype="image",
-            subtype="png",
-            filename=file_name
-        )
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
 
-    # 🚀 Send email
-    with smtplib.SMTP(smtp_host, smtp_port) as server:
-        server.starttls()
-        server.login(smtp_email, smtp_pass)
-        server.send_message(msg)
+    service.users().messages().send(
+        userId="me",
+        body={"raw": raw},
+    ).execute()
