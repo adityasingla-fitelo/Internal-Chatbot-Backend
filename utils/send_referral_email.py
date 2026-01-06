@@ -23,18 +23,18 @@ def send_referral_email(data):
     msg["Cc"] = data["email"]
     msg["Subject"] = "Referral Amount Discrepancy – Dietician Support Request"
 
-    # ✅ Clean, professional, human-written email (NO HTML, NO bold blocks)
+    # ✅ Clean, professional, plain-text email with light emphasis
     msg.set_content(
 f"""Hi Abhishek,
 
 I hope you are doing well.
 
-This email is regarding a referral amount discrepancy raised by one of our dieticians through the Fitelo Internal Support Tool.
+This email is regarding a **referral amount discrepancy** raised by one of our dieticians through the Fitelo Internal Support Tool.
 
-Dietician Email:
-{data['email']}
+**Dietician Details**
+Email: {data['email']}
 
-Issue Details:
+**Issue Details**
 {data['description']}
 
 The relevant screenshots related to the payment and referral sheet have been attached for your reference.
@@ -48,7 +48,7 @@ Fitelo Internal Support Tool
 """
     )
 
-    # 📎 Attach files
+    # 📎 Attach screenshots
     for path in [data["payment_screenshot"], data["referral_screenshot"]]:
         with open(path, "rb") as f:
             msg.add_attachment(

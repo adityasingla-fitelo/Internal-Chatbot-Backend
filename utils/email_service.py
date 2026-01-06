@@ -23,18 +23,18 @@ def send_sales_email(data):
     msg["Cc"] = data["email"]
     msg["Subject"] = "Sales Amount Discrepancy – Dietician Support Request"
 
-    # ✅ Clean, professional plain-text email
+    # ✅ Clean, professional, human-written plain-text email
     msg.set_content(
 f"""Hi Abhishek,
 
 I hope you are doing well.
 
-This email is regarding a sales amount discrepancy raised by one of our dieticians through the Fitelo Internal Support Tool.
+This email is regarding a **sales amount discrepancy** raised by one of our dieticians through the Fitelo Internal Support Tool.
 
-Dietician Email:
-{data['email']}
+**Dietician Details**
+Email: {data['email']}
 
-Issue Details:
+**Issue Details**
 {data['description']}
 
 The relevant screenshots related to the payment and sales dashboard have been attached for your reference.
