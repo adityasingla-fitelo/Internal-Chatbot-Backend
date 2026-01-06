@@ -25,28 +25,28 @@ def send_sales_email(data):
 
     # ✅ Clean, professional, human-written plain-text email
     msg.set_content(
-f"""Hi Abhishek,
+    f"""Hi Abhishek,
 
-I hope you are doing well.
+    I hope you are doing well.
 
-This email is regarding a **sales amount discrepancy** raised by one of our dieticians through the Fitelo Internal Support Tool.
+    This email is regarding a sales amount discrepancy raised by one of our dieticians through the Fitelo Internal Support Tool.
 
-**Dietician Details**
-Email: {data['email']}
+    DIETICIAN DETAILS
+    Email: {data['email']}
 
-**Issue Details**
-{data['description']}
+    ISSUE DETAILS
+    {data['description']}
 
-The relevant screenshots related to the payment and sales dashboard have been attached for your reference.
+    The relevant screenshots related to the payment and sales dashboard have been attached for your reference.
 
-Requesting you to please review the issue and take the necessary action at your end.
+    Requesting you to please review the issue and take the necessary action at your end.
 
-Thank you for your time and support.
+    Thank you for your time and support.
 
-Regards,
-Fitelo Internal Support Tool
-"""
-    )
+    Regards,
+    Fitelo Internal Support Tool
+    """
+)
 
     # 📎 Attach screenshots
     for path in [
