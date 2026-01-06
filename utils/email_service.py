@@ -19,11 +19,10 @@ def send_sales_email(data):
 
     msg = EmailMessage()
     msg["From"] = os.getenv("GMAIL_SENDER_EMAIL")
-    msg["To"] = "aditya.s@fitelo.co"
+    msg["To"] = "abhishek.khanna@fitelo.co"
     msg["Cc"] = data["email"]
     msg["Subject"] = "Sales Amount Discrepancy – Dietician Support Request"
 
-    # ✅ Clean, professional, human-written plain-text email
     msg.set_content(
     f"""Hi Abhishek,
 
@@ -31,10 +30,10 @@ def send_sales_email(data):
 
     This email is regarding a sales amount discrepancy raised by one of our dieticians through the Fitelo Internal Support Tool.
 
-    DIETICIAN DETAILS
+    Dietician Details:-
     Email: {data['email']}
 
-    ISSUE DETAILS
+    Issue Details:-
     {data['description']}
 
     The relevant screenshots related to the payment and sales dashboard have been attached for your reference.

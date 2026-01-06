@@ -19,7 +19,7 @@ def send_referral_email(data):
 
     msg = EmailMessage()
     msg["From"] = os.getenv("GMAIL_SENDER_EMAIL")
-    msg["To"] = "aditya.s@fitelo.co"
+    msg["To"] = "abhishek.khanna@fitelo.co"
     msg["Cc"] = data["email"]
     msg["Subject"] = "Referral Amount Discrepancy – Dietician Support Request"
 
@@ -31,10 +31,10 @@ I hope you are doing well.
 
 This email is regarding a referral amount discrepancy raised by one of our dieticians through the Fitelo Internal Support Tool.
 
-DIETICIAN DETAILS
+Dietician Details:-
 Email: {data['email']}
 
-ISSUE DETAILS
+Issue Details:-
 {data['description']}
 
 The relevant screenshots related to the payment and referral sheet have been attached for your reference.
