@@ -23,7 +23,6 @@ def send_referral_email(data):
     msg["Cc"] = data["email"]
     msg["Subject"] = "Referral Amount Discrepancy – Dietician Support Request"
 
-    # ✅ Clean, professional, plain-text email with light emphasis
     msg.set_content(
 f"""Hi Abhishek,
 
