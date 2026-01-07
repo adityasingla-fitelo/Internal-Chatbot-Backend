@@ -1,11 +1,17 @@
-from fastapi import FastAPI, Form, UploadFile, File
+from fastapi import FastAPI, Form, UploadFile, File, Body
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Dict
 
 from upload import save_upload
 from embeddings_store import load_intent_embeddings
 from intent_matcher import match_intent
 from intent_router import route_intent
 from session_store import get_session, save_session, clear_session
+from approval_store import (
+    save_approval_request,
+    get_all_approvals,
+    update_approval_status
+)
 
 app = FastAPI()
 
@@ -18,30 +24,23 @@ app.add_middleware(
 
 intent_embeddings = load_intent_embeddings()
 
-
+# =====================================================
+# 💬 CHAT
+# =====================================================
 @app.post("/chat")
-async def chat(
-    session_id: str = Form(...),
-    message: str = Form(...)
-):
+async def chat(session_id: str = Form(...), message: str = Form(...)):
     session = get_session(session_id)
     msg = message.strip().lower()
 
-    # ---- Ensure session keys ----
     session.setdefault("pending_intent", None)
     session.setdefault("final_intent", None)
     session.setdefault("awaiting_confirmation", False)
     session.setdefault("workflow_state", None)
     session.setdefault("data", {})
 
-    # ------------------------------------------------
-    # 1️⃣ ACTIVE WORKFLOW → ROUTE ONLY (CRITICAL)
-    # ------------------------------------------------
     if session["final_intent"]:
         updated_session, reply, stage = route_intent(
-            session["final_intent"],
-            session,
-            message
+            session["final_intent"], session, message
         )
 
         if updated_session is None:
@@ -51,9 +50,6 @@ async def chat(
 
         return {"reply": reply, "stage": stage}
 
-    # ------------------------------------------------
-    # 2️⃣ WAITING FOR INTENT CONFIRMATION
-    # ------------------------------------------------
     if session["awaiting_confirmation"]:
         if msg == "yes":
             session["final_intent"] = session["pending_intent"]
@@ -61,11 +57,8 @@ async def chat(
             session["awaiting_confirmation"] = False
             save_session(session_id, session)
 
-            # Immediately start workflow
             updated_session, reply, stage = route_intent(
-                session["final_intent"],
-                session,
-                message=""
+                session["final_intent"], session, ""
             )
 
             if updated_session:
@@ -75,38 +68,47 @@ async def chat(
 
         if msg == "no":
             clear_session(session_id)
-            return {
-                "reply": "No problem. Please state your query more clearly.",
-                "stage": "rephrase"
-            }
+            return {"reply": "Please rephrase your query.", "stage": "restart"}
 
-        return {
-            "reply": "Please reply with Yes or No.",
-            "stage": "awaiting_confirmation"
-        }
+        return {"reply": "Reply Yes or No.", "stage": "awaiting_confirmation"}
 
-    # ------------------------------------------------
-    # 3️⃣ NEW CONVERSATION → DETECT INTENT
-    # ------------------------------------------------
     result = match_intent(message, intent_embeddings)
-
     session["pending_intent"] = result["intent"]
     session["awaiting_confirmation"] = True
     save_session(session_id, session)
 
     return {
-        "reply": (
-            f"Thanks for reaching out. I understand your query is regarding "
-            f"'{result['intent']}'. Please enter Yes or No."
-        ),
+        "reply": f"I understand your query is regarding '{result['intent']}'. Should I proceed? (Yes / No)",
         "stage": "intent_confirmation"
     }
 
 
+# =====================================================
+# 📎 FILE UPLOAD
+# =====================================================
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     path = await save_upload(file)
-    return {
-        "file_path": path,
-        "original_name": file.filename
-    }
+    return {"file_path": path}
+
+
+# =====================================================
+# 📊 APPROVAL DASHBOARD APIs
+# =====================================================
+@app.get("/approvals")
+def get_approvals():
+    return get_all_approvals()
+
+
+@app.post("/approvals/update")
+def update_approval(payload: Dict = Body(...)):
+    updated = update_approval_status(
+        approval_id=payload["id"],
+        status=payload["status"],
+        remarks=payload.get("remarks", "")
+    )
+
+    if not updated:
+        return {"success": False}
+
+    return {"success": True, "data": updated}

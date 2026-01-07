@@ -11,5 +11,12 @@
 
   "client_email_update": "Client wants to update email id. Email id change request from client. Client ka email galat add ho gaya hai. Need to update client email address. Client ne bola email change kar do. Email id correction chahiye. Mera client email update karwana chahta hai. Client ka email wrong hai system me. New email add karni hai client ke liye. Client wants to replace old email with new one.",
 
-  "app_stuck_on_logo": "Fitelo app is stuck on logo. App stuck at logo screen. Client app logo se aage nahi ja raha. App open ho raha hai par logo pe hi atak gaya hai. Mere client ka app logo pe stuck hai. App loading screen pe hi stuck hai. Client ka app start nahi ho raha logo ke baad. App freeze ho gaya logo screen par. Logo ke baad app open nahi hota. Client facing logo stuck issue."
+  "app_stuck_on_logo": "Fitelo app is stuck on logo. App stuck at logo screen. Client app logo se aage nahi ja raha. App open ho raha hai par logo pe hi atak gaya hai. Mere client ka app logo pe stuck hai. App loading screen pe hi stuck hai. Client ka app start nahi ho raha logo ke baad. App freeze ho gaya logo screen par. Logo ke baad app open nahi hota. Client facing logo stuck issue.",
+
+  "change_end_date": "Client wants to change the end date of the plan. Need to update plan end date for client. Client ne bola plan ka end date extend karna hai. End date change request hai. Mera client ka plan jaldi khatam ho raha hai end date badhani hai. Client wants to extend the plan end date. Plan end date galat set ho gayi hai. Client ka plan next week khatam ho raha hai end date change karni hai. End date modify karni hai. Client ne bola plan aur continue karega. Diet plan end date change karni hai.",
+
+  "add_pause_days": "Client wants to add more pause days to the plan. Client ne bola pause days kam pad gaye hain increase karna hai. Need to increase pause days for client. Pause days extension request hai. Mera client aur pause days chahta hai. Client ka pause balance khatam ho gaya hai aur extra pause chahiye. Client wants to increase pause quota. Pause days add karni hai client ke plan me. Client ne bola vacation extend ho gaya hai pause days badhani hai. Diet plan ke pause days modify karne hai. Client wants additional pause days.",
+
+  "transfer_plan": "Client wants to change the current plan to a different plan. Plan transfer request from client. Client ne bola current plan change karna hai. Need to transfer client to another plan. Client wants to upgrade or downgrade the plan. Mera client dusre plan me shift hona chahta hai. Client ka plan change request hai. Current plan suitable nahi hai client ke liye. Client wants to move to another diet plan. Plan migration karni hai client ki. Client ne bola different plan chahiye."
+
 }
