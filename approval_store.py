@@ -1,21 +1,18 @@
 # approval_store.py
 from typing import Dict, List
 
-APPROVALS: List[Dict] = []
-
+_APPROVALS: List[Dict] = []
 
 def save_approval_request(payload: Dict):
-    payload["id"] = len(APPROVALS) + 1
-    APPROVALS.append(payload)
-
+    payload["id"] = len(_APPROVALS) + 1
+    _APPROVALS.append(payload)
 
 def get_all_approvals():
-    return APPROVALS
+    return _APPROVALS
 
-
-def update_approval_status(approval_id: int, status: str, remarks: str):
-    for item in APPROVALS:
-        if item["id"] == approval_id:
+def update_approval_status(id: int, status: str, remarks: str):
+    for item in _APPROVALS:
+        if item["id"] == id:
             item["status"] = status
             item["remarks"] = remarks
             return item

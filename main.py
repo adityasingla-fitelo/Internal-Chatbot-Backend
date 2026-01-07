@@ -7,11 +7,8 @@ from embeddings_store import load_intent_embeddings
 from intent_matcher import match_intent
 from intent_router import route_intent
 from session_store import get_session, save_session, clear_session
-from approval_store import (
-    save_approval_request,
-    get_all_approvals,
-    update_approval_status
-)
+from approval_store import get_all_approvals, update_approval_status
+from fastapi import Body
 
 app = FastAPI()
 
@@ -99,16 +96,11 @@ async def upload_file(file: UploadFile = File(...)):
 def get_approvals():
     return get_all_approvals()
 
-
 @app.post("/approvals/update")
-def update_approval(payload: Dict = Body(...)):
+def update_approval(payload: dict = Body(...)):
     updated = update_approval_status(
-        approval_id=payload["id"],
-        status=payload["status"],
-        remarks=payload.get("remarks", "")
+        payload["id"],
+        payload["status"],
+        payload.get("remarks", "")
     )
-
-    if not updated:
-        return {"success": False}
-
     return {"success": True, "data": updated}
