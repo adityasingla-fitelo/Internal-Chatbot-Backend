@@ -12,20 +12,27 @@ def handle_change_start_date(
     state = session.get("workflow_state")
     session.setdefault("data", {})
 
+    # 1️⃣ Ask phone
     if state is None:
         session["workflow_state"] = "ask_phone"
         return session, "Please share the client's phone number.", "ask_phone"
 
+    # 2️⃣ Save phone
     if state == "ask_phone":
         session["data"]["phone"] = msg
         session["workflow_state"] = "ask_reason"
         return session, "Please mention the reason for changing the start date.", "ask_reason"
 
+    # 3️⃣ Save reason
     if state == "ask_reason":
+        if not msg:
+            return session, "Please provide a valid reason.", "ask_reason"
+
         session["data"]["reason"] = msg
         session["workflow_state"] = "ask_new_date"
         return session, "Please select the new start date using the calendar.", "ask_single_date"
 
+    # 4️⃣ Save approval
     if state == "ask_new_date":
         new_start_date = datetime.strptime(msg, "%Y-%m-%d").date()
 
@@ -48,3 +55,6 @@ def handle_change_start_date(
             "Your request has been raised.\n\nYou can check the approval status below.",
             "show_approval_status_button"
         )
+
+    session.clear()
+    return None, "Something went wrong. Let's start again.", "restart"
